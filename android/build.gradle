@@ -17,7 +17,7 @@ buildscript {
         dependencies {
             classpath 'com.android.tools.build:gradle:3.4.1'
 
-            implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+            classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
         }
     }
 }
@@ -25,8 +25,8 @@ buildscript {
 apply plugin: 'com.android.library'
 apply plugin: 'maven'
 
-apply plugin: "kotlin-android"
-apply plugin: "kotlin-android-extensions"
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
 
 // Matches values in recent template from React Native 0.59 / 0.60
 // https://github.com/facebook/react-native/blob/0.59-stable/template/android/build.gradle#L5-L9
