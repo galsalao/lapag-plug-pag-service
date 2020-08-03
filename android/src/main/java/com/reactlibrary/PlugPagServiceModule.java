@@ -105,10 +105,14 @@ public class PlugPagServiceModule extends ReactContextBaseJavaModule {
 
     // Cria a identificação do aplicativo
     @ReactMethod
-    public void setAppIdentification(String name, String version, Callback callback) {
-        PlugPagAppIdentificationWrapper appIdentification = new PlugPagAppIdentificationWrapper(name, version);
-        appIdentifications.add(appIdentification);
-        callback.invoke(appIdentification.tag);
+    public void setAppIdentification(String name, String version, Callback callback, Callback errorCallback) {
+        try {
+            PlugPagAppIdentificationWrapper appIdentification = new PlugPagAppIdentificationWrapper(name, version);
+            appIdentifications.add(appIdentification);
+            callback.invoke(appIdentification.tag);
+        } catch (Exception err) {
+            errorCallback.invoke("Can't create app identification: " + err.toString());
+        }
     }
 
     // Cria a referência do PlugPag
@@ -126,7 +130,7 @@ public class PlugPagServiceModule extends ReactContextBaseJavaModule {
             this.plugPags.add(plugpag);
             successCallback.invoke(plugpag.tag);
         } else {
-            errorCallback.invoke("Can't find app Identification");
+            errorCallback.invoke("Can't find app identification");
         }
     }
 
@@ -184,7 +188,6 @@ public class PlugPagServiceModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void calculateInstallments(String plugPagId, String saleValue, Callback successCallback, Callback errorCallback) {
         if (saleValue != null && saleValue != "0") {
-
             PlugPagWrapper plugPagWrapper = null;
 
             for (PlugPagWrapper wrapper: plugPags) {
