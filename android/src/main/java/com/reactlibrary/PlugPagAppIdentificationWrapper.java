@@ -14,9 +14,7 @@ public class PlugPagAppIdentificationWrapper {
         this.tag = uuid.toString();
     }
 
-    public boolean equals(String o) {
-        if (this.tag.equals(0))
-            return true;
-        return false;
+    public boolean equals(String value) {
+        return this.tag.equals(value);
     }
 }
