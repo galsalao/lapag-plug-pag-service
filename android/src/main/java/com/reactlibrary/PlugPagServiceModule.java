@@ -49,7 +49,7 @@ public class PlugPagServiceModule extends ReactContextBaseJavaModule {
             put("TYPE_CREDITO", PlugPag.TYPE_CREDITO);
             put("TYPE_DEBITO", PlugPag.TYPE_DEBITO);
             put("TYPE_VOUCHER", PlugPag.TYPE_VOUCHER);
-            put("TYPE_QRCODE", PlugPag.TYPE_QRCODE);
+            // put("TYPE_QRCODE", PlugPag.TYPE_QRCODE);
 
             put("INSTALLMENT_TYPE_A_VISTA", PlugPag.INSTALLMENT_TYPE_A_VISTA);
             put("INSTALLMENT_TYPE_PARC_VENDEDOR", PlugPag.INSTALLMENT_TYPE_PARC_VENDEDOR);
