@@ -155,9 +155,8 @@ public class PlugPagServiceModule extends ReactContextBaseJavaModule {
                 }
 
                 if (plugPagWrapper != null) {
-                    // PlugPagInitializationResult initResult = plugPagWrapper.plugPag.initializeAndActivatePinpad(activationData);
-                    // successCallback.invoke(initResult.getResult());
-                    successCallback.invoke(0);
+                    PlugPagInitializationResult initResult = plugPagWrapper.plugPag.initializeAndActivatePinpad(activationData);
+                    successCallback.invoke(initResult.getResult());
                 } else {
                     errorCallback.invoke("Can't find plugPag");
                 }
