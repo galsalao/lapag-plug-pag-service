@@ -15,10 +15,10 @@ import java.util.Map;
 import br.com.uol.pagseguro.plugpagservice.wrapper.PlugPag;
 import br.com.uol.pagseguro.plugpagservice.wrapper.PlugPagActivationData;
 import br.com.uol.pagseguro.plugpagservice.wrapper.PlugPagAppIdentification;
-import br.com.uol.pagseguro.plugpagservice.wrapper.PlugPagCardInfoResult;
+// import br.com.uol.pagseguro.plugpagservice.wrapper.PlugPagCardInfoResult;
 import br.com.uol.pagseguro.plugpagservice.wrapper.PlugPagInitializationResult;
-import br.com.uol.pagseguro.plugpagservice.wrapper.PlugPagNearFieldCardData;
-import br.com.uol.pagseguro.plugpagservice.wrapper.PlugPagNFCResult;
+// import br.com.uol.pagseguro.plugpagservice.wrapper.PlugPagNearFieldCardData;
+// import br.com.uol.pagseguro.plugpagservice.wrapper.PlugPagNFCResult;
 import br.com.uol.pagseguro.plugpagservice.wrapper.PlugPagPaymentData;
 import br.com.uol.pagseguro.plugpagservice.wrapper.PlugPagTransactionResult;
 
