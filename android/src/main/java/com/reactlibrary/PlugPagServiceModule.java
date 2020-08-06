@@ -118,19 +118,23 @@ public class PlugPagServiceModule extends ReactContextBaseJavaModule {
     // Cria a referência do PlugPag
     @ReactMethod
     public void getPlugPag(String appId, Callback successCallback, Callback errorCallback) {
-        PlugPagAppIdentificationWrapper appIdWrapper = null;
-        for (PlugPagAppIdentificationWrapper appIdentification: appIdentifications) {
-            if (appIdentification.equals(appId)) {
-                appIdWrapper = appIdentification;
-                break;
+        try {
+            PlugPagAppIdentificationWrapper appIdWrapper = null;
+            for (PlugPagAppIdentificationWrapper appIdentification: appIdentifications) {
+                if (appIdentification.equals(appId)) {
+                    appIdWrapper = appIdentification;
+                    break;
+                }
             }
-        }
-        if (appIdWrapper != null) {
-            PlugPagWrapper plugpag = new PlugPagWrapper(reactContext, appIdWrapper.appIdentification);
-            this.plugPags.add(plugpag);
-            successCallback.invoke(plugpag.tag);
-        } else {
-            errorCallback.invoke("Can't find app identification");
+            if (appIdWrapper != null) {
+                PlugPagWrapper plugpag = new PlugPagWrapper(reactContext, appIdWrapper.appIdentification);
+                this.plugPags.add(plugpag);
+                successCallback.invoke(plugpag.tag);
+            } else {
+                errorCallback.invoke("Can't find app identification");
+            }
+        } catch (Exception err) {
+            errorCallback.invoke("Can't get PlugPag: " + err.toString());
         }
     }
 
