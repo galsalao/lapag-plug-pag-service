@@ -141,7 +141,31 @@ public class PlugPagServiceModule extends ReactContextBaseJavaModule {
     // Ativa terminal e faz o pagamento
     @ReactMethod
     public void initializeAndActivatePinpad(String plugPagId, String jsonStr, Callback successCallback, Callback errorCallback) {
-        errorCallback.invoke("PlugPagActivationData error");
+        try {
+            PlugPagActivationData activationData = JsonParseUtils.getPlugPagActivationDataFromJson(jsonStr);
+            if (activationData != null) {
+
+                PlugPagWrapper plugPagWrapper = null;
+
+                for (PlugPagWrapper wrapper: plugPags) {
+                    if (wrapper.equals(plugPagId)) {
+                        plugPagWrapper = wrapper;
+                        break;
+                    }
+                }
+
+                if (plugPagWrapper != null) {
+                    PlugPagInitializationResult initResult = plugPagWrapper.plugPag.initializeAndActivatePinpad(activationData);
+                    successCallback.invoke(initResult.getResult());
+                } else {
+                    errorCallback.invoke("Can't find plugPag");
+                }
+            } else {
+                errorCallback.invoke("PlugPagActivationData error");
+            }
+        } catch (Exception err) {
+            errorCallback.invoke("Can't initialize and activate pinpad: " + err.toString());
+        }
     }
 
     @ReactMethod
