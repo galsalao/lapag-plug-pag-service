@@ -137,57 +137,92 @@ public class PlugPagServiceModule extends ReactContextBaseJavaModule {
     // Ativa terminal e faz o pagamento
     @ReactMethod
     public void initializeAndActivatePinpad(String plugPagId, String jsonStr, Callback successCallback, Callback errorCallback) {
-        PlugPagActivationData activationData = JsonParseUtils.getPlugPagActivationDataFromJson(jsonStr);
-        if (activationData != null) {
+        try {
+            PlugPagActivationData activationData = JsonParseUtils.getPlugPagActivationDataFromJson(jsonStr);
+            if (activationData != null) {
 
-            PlugPagWrapper plugPagWrapper = null;
+                PlugPagWrapper plugPagWrapper = null;
 
-            for (PlugPagWrapper wrapper: plugPags) {
-                if (wrapper.equals(plugPagId)) {
-                    plugPagWrapper = wrapper;
-                    break;
+                for (PlugPagWrapper wrapper: plugPags) {
+                    if (wrapper.equals(plugPagId)) {
+                        plugPagWrapper = wrapper;
+                        break;
+                    }
                 }
-            }
 
-            if (plugPagWrapper != null) {
-                PlugPagInitializationResult initResult = plugPagWrapper.plugPag.initializeAndActivatePinpad(activationData);
-                successCallback.invoke(initResult.getResult());
+                if (plugPagWrapper != null) {
+                    PlugPagInitializationResult initResult = plugPagWrapper.plugPag.initializeAndActivatePinpad(activationData);
+                    successCallback.invoke(initResult.getResult());
+                } else {
+                    errorCallback.invoke("Can't find plugPag");
+                }
             } else {
-                errorCallback.invoke("Can't find plugPag");
+                errorCallback.invoke("PlugPagActivationData error");
             }
-        } else {
-            errorCallback.invoke("PlugPagActivationData error");
+        } catch (Exception err) {
+            errorCallback.invoke("Can't initialize and activate pinpad: " + err.toString());
         }
     }
 
     @ReactMethod
     public void doPayment(String plugPagId, String jsonStr, Callback successCallback, Callback errorCallback) {
-        PlugPagPaymentData paymentData = JsonParseUtils.getPlugPagPaymentDataFromJson(jsonStr);
-        if (paymentData != null) {
+        try {
+            PlugPagPaymentData paymentData = JsonParseUtils.getPlugPagPaymentDataFromJson(jsonStr);
+            if (paymentData != null) {
 
-            PlugPagWrapper plugPagWrapper = null;
+                PlugPagWrapper plugPagWrapper = null;
 
-            for (PlugPagWrapper wrapper: plugPags) {
-                if (wrapper.equals(plugPagId)) {
-                    plugPagWrapper = wrapper;
-                    break;
+                for (PlugPagWrapper wrapper: plugPags) {
+                    if (wrapper.equals(plugPagId)) {
+                        plugPagWrapper = wrapper;
+                        break;
+                    }
                 }
-            }
 
-            if (plugPagWrapper != null) {
-                PlugPagTransactionResult transactionResult = plugPagWrapper.plugPag.doPayment(paymentData);
-                successCallback.invoke(transactionResult.getResult());
+                if (plugPagWrapper != null) {
+                    PlugPagTransactionResult transactionResult = plugPagWrapper.plugPag.doPayment(paymentData);
+                    successCallback.invoke(transactionResult.getResult());
+                } else {
+                    errorCallback.invoke("Can't find plugPag");
+                }
             } else {
-                errorCallback.invoke("Can't find plugPag");
+                errorCallback.invoke("PlugPagPaymentData error");
             }
-        } else {
-            errorCallback.invoke("PlugPagPaymentData error");
+        } catch (Exception err) {
+            errorCallback.invoke("Can't do payment: " + err.toString());
         }
     }
 
     @ReactMethod
     public void calculateInstallments(String plugPagId, String saleValue, Callback successCallback, Callback errorCallback) {
-        if (saleValue != null && saleValue != "0") {
+        try {
+            if (saleValue != null && saleValue != "0") {
+                PlugPagWrapper plugPagWrapper = null;
+
+                for (PlugPagWrapper wrapper: plugPags) {
+                    if (wrapper.equals(plugPagId)) {
+                        plugPagWrapper = wrapper;
+                        break;
+                    }
+                }
+
+                if (plugPagWrapper != null) {
+                    String[] installments = plugPagWrapper.plugPag.calculateInstallments(saleValue);
+                    successCallback.invoke(installments);
+                } else {
+                    errorCallback.invoke("Can't find plugPag");
+                }
+            } else {
+                errorCallback.invoke("PlugPagSaleValue error");
+            }
+        } catch (Exception err) {
+            errorCallback.invoke("Can't calculate installments: " + err.toString());
+        }
+    }
+
+    @ReactMethod
+    public void readCard(String plugPagId, Callback successCallback, Callback errorCallback) {
+        try {
             PlugPagWrapper plugPagWrapper = null;
 
             for (PlugPagWrapper wrapper: plugPags) {
@@ -198,55 +233,40 @@ public class PlugPagServiceModule extends ReactContextBaseJavaModule {
             }
 
             if (plugPagWrapper != null) {
-                String[] installments = plugPagWrapper.plugPag.calculateInstallments(saleValue);
-                successCallback.invoke(installments);
+                PlugPagCardInfoResult dataCard = plugPagWrapper.plugPag.getCardData();
+                successCallback.invoke(dataCard.getResult());
             } else {
                 errorCallback.invoke("Can't find plugPag");
             }
-        } else {
-            errorCallback.invoke("PlugPagSaleValue error");
-        }
-    }
-
-    @ReactMethod
-    public void readCard(String plugPagId, Callback successCallback, Callback errorCallback) {
-        PlugPagWrapper plugPagWrapper = null;
-
-        for (PlugPagWrapper wrapper: plugPags) {
-            if (wrapper.equals(plugPagId)) {
-                plugPagWrapper = wrapper;
-                break;
-            }
-        }
-
-        if (plugPagWrapper != null) {
-            PlugPagCardInfoResult dataCard = plugPagWrapper.plugPag.getCardData();
-            successCallback.invoke(dataCard.getResult());
-        } else {
-            errorCallback.invoke("Can't find plugPag");
+        } catch (Exception err) {
+            errorCallback.invoke("Can't read card: " + err.toString());
         }
     }
 
     @ReactMethod
     public void readNFCCard(String plugPagId, Callback successCallback, Callback errorCallback) {
-        PlugPagWrapper plugPagWrapper = null;
+        try {
+            PlugPagWrapper plugPagWrapper = null;
 
-        for (PlugPagWrapper wrapper: plugPags) {
-            if (wrapper.equals(plugPagId)) {
-                plugPagWrapper = wrapper;
-                break;
+            for (PlugPagWrapper wrapper: plugPags) {
+                if (wrapper.equals(plugPagId)) {
+                    plugPagWrapper = wrapper;
+                    break;
+                }
             }
-        }
 
-        if (plugPagWrapper != null) {
-            PlugPagNearFieldCardData dataCard = new PlugPagNearFieldCardData();
-            dataCard.setStartSlot(1);
-            dataCard.setEndSlot(1);
+            if (plugPagWrapper != null) {
+                PlugPagNearFieldCardData dataCard = new PlugPagNearFieldCardData();
+                dataCard.setStartSlot(1);
+                dataCard.setEndSlot(1);
 
-            PlugPagNFCResult result = plugPagWrapper.plugPag.readFromNFCCard(dataCard);
-            successCallback.invoke(result.getResult());
-        } else {
-            errorCallback.invoke("Can't find plugPag");
+                PlugPagNFCResult result = plugPagWrapper.plugPag.readFromNFCCard(dataCard);
+                successCallback.invoke(result.getResult());
+            } else {
+                errorCallback.invoke("Can't find plugPag");
+            }
+        } catch (Exception err) {
+            errorCallback.invoke("Can't read NFC card: " + err.toString());
         }
     }
 
