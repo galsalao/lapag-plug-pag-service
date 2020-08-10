@@ -1,16 +1,16 @@
 {
-  "name": "react-native-plug-pag-service",
+  "name": "lapag-plug-pag-service",
   "title": "React Native Plug Pag Service",
   "version": "0.1.4",
-  "description": "React Native Plug Pag Service Plugin",
+  "description": "Lapag Plug Pag Service Plugin",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/EmreKayaoglu/React-Native-Plug-Pag-Service.git",
-    "baseUrl": "https://github.com/EmreKayaoglu/React-Native-Plug-Pag-Service"
+    "url": "git+https://github.com/Vizir/lapag-plug-pag-service.git",
+    "baseUrl": "https://github.com/Vizir/lapag-plug-pag-service.git"
   },
   "keywords": [
     "react-native"
