@@ -6,11 +6,21 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
+import java.util.concurrent.TimeUnit;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import android.util.Log;
+import android.app.Activity;
+
+import com.facebook.react.ReactApplication;
+import com.facebook.react.ReactNativeHost;
+import com.facebook.react.ReactInstanceManager;
+import com.facebook.react.shell.MainReactPackage;
+
 
 import br.com.uol.pagseguro.plugpagservice.wrapper.PlugPag;
 import br.com.uol.pagseguro.plugpagservice.wrapper.PlugPagActivationData;
@@ -21,19 +31,26 @@ import br.com.uol.pagseguro.plugpagservice.wrapper.PlugPagNearFieldCardData;
 import br.com.uol.pagseguro.plugpagservice.wrapper.PlugPagNFCResult;
 import br.com.uol.pagseguro.plugpagservice.wrapper.PlugPagPaymentData;
 import br.com.uol.pagseguro.plugpagservice.wrapper.PlugPagTransactionResult;
+import br.com.uol.pagseguro.plugpagservice.wrapper.PlugPagEventData;
+import br.com.uol.pagseguro.plugpagservice.wrapper.PlugPagPrintResult;
+import br.com.uol.pagseguro.plugpagservice.wrapper.PlugPagEventListener;
+import br.com.uol.pagseguro.plugpagservice.wrapper.listeners.PlugPagPaymentListener;
+import br.com.uol.pagseguro.plugpagservice.wrapper.PlugPagAbortResult;
+
 
 public class PlugPagServiceModule extends ReactContextBaseJavaModule {
 
+    public static PlugPagServiceModule lastInstance;
     private final ReactApplicationContext reactContext;
     private ArrayList<PlugPagAppIdentificationWrapper> appIdentifications;
     private ArrayList<PlugPagWrapper> plugPags;
-
-    public PlugPagServiceModule(ReactApplicationContext reactContext) {
-        super(reactContext);
-        this.reactContext = reactContext;
-
+    
+    public PlugPagServiceModule(ReactApplicationContext applicationContext) {
+        super(applicationContext);
+        reactContext = applicationContext;
         appIdentifications = new ArrayList<>();
         plugPags = new ArrayList<>();
+        lastInstance = this;
     }
 
     @Override
@@ -169,7 +186,30 @@ public class PlugPagServiceModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public void doPayment(String plugPagId, String jsonStr, Callback successCallback, Callback errorCallback) {
+    public void ReprintCustomerReceipt(String plugPagId) {
+        try {
+            PlugPagWrapper plugPagWrapper = null;
+            for (PlugPagWrapper wrapper: plugPags) {
+                if (wrapper.equals(plugPagId)) {
+                    plugPagWrapper = wrapper;
+                    break;
+                }
+            }
+            if (plugPagWrapper != null) {
+                PlugPagPrintResult result = plugPagWrapper.plugPag.reprintCustomerReceipt();
+            }
+         
+
+        } catch (Exception err) {
+            System.out.println("Can't ReprintCustomerReceipt: " + err.toString());
+        }
+
+    } 
+     
+    @ReactMethod
+    public void DoPayment(String plugPagId, String jsonStr, Callback transactionCallback, Callback errorCallback) {
+        final Callback returnTransaction = transactionCallback;
+        final Callback returnTransactionError = errorCallback;
         try {
             PlugPagPaymentData paymentData = JsonParseUtils.getPlugPagPaymentDataFromJson(jsonStr);
             if (paymentData != null) {
@@ -184,18 +224,120 @@ public class PlugPagServiceModule extends ReactContextBaseJavaModule {
                 }
 
                 if (plugPagWrapper != null) {
-                    PlugPagTransactionResult transactionResult = plugPagWrapper.plugPag.doPayment(paymentData);
-                    successCallback.invoke(transactionResult.getResult());
+                    plugPagWrapper.plugPag.doAsyncPayment(paymentData, new PlugPagPaymentListener() {
+                    @Override
+                    public void onSuccess(PlugPagTransactionResult
+                    plugPagTransactionResult) {
+                        WritableMap payload = Arguments.createMap();
+                        payload.putString("message", plugPagTransactionResult.getMessage());
+                        payload.putString("errorCode", plugPagTransactionResult.getErrorCode());
+                        payload.putString("transactionCode", plugPagTransactionResult.getTransactionCode());
+                        payload.putString("transactionId", plugPagTransactionResult.getTransactionId());
+                        returnTransaction.invoke(payload);
+                    }
+                    @Override
+                    public void onError(PlugPagTransactionResult
+                    plugPagTransactionResult) {
+                        WritableMap payload = Arguments.createMap();
+                        payload.putString("message", plugPagTransactionResult.getMessage());
+                        payload.putString("errorCode", plugPagTransactionResult.getErrorCode());
+                        payload.putString("transactionCode", plugPagTransactionResult.getTransactionCode());
+                        payload.putString("transactionId", plugPagTransactionResult.getTransactionId());
+                        returnTransactionError.invoke(payload);
+                    }
+                    @Override
+                    public void onPaymentProgress(PlugPagEventData
+                    plugPagEventData) {
+                        TransactionSendEventToJS(plugPagEventData);
+                    }
+                    @Override
+                    public void onPrinterSuccess(PlugPagPrintResult
+                    plugPagPrintResult) {
+                    }
+                    @Override
+                    public void onPrinterError(PlugPagPrintResult
+                    plugPagPrintResult) {
+
+                    }
+                    });
+                    
                 } else {
-                    errorCallback.invoke("Can't find plugPag");
+                    System.out.println("Can't find plugPag");
+                    errorCallback.invoke("doPayment Error");
                 }
             } else {
-                errorCallback.invoke("PlugPagPaymentData error");
+                System.out.println("PlugPagPaymentData error");
+                errorCallback.invoke("PlugPagPaymentData Error");
             }
         } catch (Exception err) {
-            errorCallback.invoke("Can't do payment: " + err.toString());
+            System.out.println("Can't do payment: " + err.toString());
+            errorCallback.invoke("Can't do payment");
+
         }
     }
+     @ReactMethod
+    public void AbortTransaction(String plugPagId) {
+        try {
+            PlugPagWrapper plugPagWrapper = null;
+            for (PlugPagWrapper wrapper: plugPags) {
+                if (wrapper.equals(plugPagId)) {
+                    plugPagWrapper = wrapper;
+                    break;
+                }
+            }
+            plugPagWrapper.plugPag.abort();
+            PlugPagAbortResult result = plugPagWrapper.plugPag.abort();
+
+            if (result.getResult() == 0) {
+                System.out.println("AbortTransaction success");
+            } else {
+                System.out.println("AbortTransaction error");
+            }
+
+        } catch (Exception err) {
+            System.out.println("Can't abort: " + err.toString());
+        }
+
+    }
+
+    @ReactMethod
+    public void TransactionEventListener(String plugPagId) {
+        try {
+            PlugPagWrapper plugPagWrapper = null;
+            for (PlugPagWrapper wrapper: plugPags) {
+                if (wrapper.equals(plugPagId)) {
+                    plugPagWrapper = wrapper;
+                    break;
+                }
+            }
+            PlugPagEventListener listener = new PlugPagEventListener() {
+
+                @Override
+        
+                public void onEvent(PlugPagEventData plugPagEventData) {
+                    TransactionSendEventToJS(plugPagEventData);
+                }
+            };
+            plugPagWrapper.plugPag.setEventListener(listener);
+
+            
+        } catch (Exception err) {
+            System.out.println("Can't listen events: " + err.toString());
+        }
+
+    }
+
+    public void TransactionSendEventToJS(PlugPagEventData plugPagEventData) {
+            Activity activity = getCurrentActivity();
+            ReactApplication application = (ReactApplication) activity.getApplication();
+            WritableMap payload = Arguments.createMap();
+            payload.putString("customMessage", plugPagEventData.getCustomMessage() != null ?plugPagEventData.getCustomMessage() : "");
+            payload.putString("eventCode", String.valueOf(plugPagEventData.getEventCode()));
+            application.getReactNativeHost().getReactInstanceManager().getCurrentReactContext()
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                .emit("eventData", payload);
+    }
+
 
     @ReactMethod
     public void calculateInstallments(String plugPagId, String saleValue, Callback successCallback, Callback errorCallback) {
@@ -238,7 +380,7 @@ public class PlugPagServiceModule extends ReactContextBaseJavaModule {
 
             if (plugPagWrapper != null) {
                 PlugPagCardInfoResult dataCard = plugPagWrapper.plugPag.getCardData();
-                successCallback.invoke(dataCard.getResult());
+                successCallback.invoke(dataCard.getResult() );
             } else {
                 errorCallback.invoke("Can't find plugPag");
             }
@@ -246,7 +388,7 @@ public class PlugPagServiceModule extends ReactContextBaseJavaModule {
             errorCallback.invoke("Can't read card: " + err.toString());
         }
     }
-
+    
     @ReactMethod
     public void readNFCCard(String plugPagId, Callback successCallback, Callback errorCallback) {
         try {
