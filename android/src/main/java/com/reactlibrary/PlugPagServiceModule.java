@@ -8,6 +8,9 @@ import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import java.util.concurrent.TimeUnit;
+import io.reactivex.Completable;
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -119,7 +122,6 @@ public class PlugPagServiceModule extends ReactContextBaseJavaModule {
 
         return constants;
     }
-
     // Cria a identificação do aplicativo
     @ReactMethod
     public void setAppIdentification(String name, String version, Callback callback, Callback errorCallback) {
@@ -205,7 +207,7 @@ public class PlugPagServiceModule extends ReactContextBaseJavaModule {
         }
 
     } 
-     
+
     @ReactMethod
     public void DoPayment(String plugPagId, String jsonStr, Callback transactionCallback, Callback errorCallback) {
         final Callback returnTransaction = transactionCallback;
@@ -248,7 +250,7 @@ public class PlugPagServiceModule extends ReactContextBaseJavaModule {
                     @Override
                     public void onPaymentProgress(PlugPagEventData
                     plugPagEventData) {
-                        TransactionSendEventToJS(plugPagEventData);
+                    TransactionSendEventToJS(plugPagEventData);
                     }
                     @Override
                     public void onPrinterSuccess(PlugPagPrintResult
@@ -275,7 +277,8 @@ public class PlugPagServiceModule extends ReactContextBaseJavaModule {
 
         }
     }
-     @ReactMethod
+    
+    @ReactMethod
     public void AbortTransaction(String plugPagId) {
         try {
             PlugPagWrapper plugPagWrapper = null;
@@ -289,9 +292,9 @@ public class PlugPagServiceModule extends ReactContextBaseJavaModule {
             PlugPagAbortResult result = plugPagWrapper.plugPag.abort();
 
             if (result.getResult() == 0) {
-                System.out.println("AbortTransaction success");
+                System.out.println("Abort success");
             } else {
-                System.out.println("AbortTransaction error");
+                System.out.println("Abort error");
             }
 
         } catch (Exception err) {
