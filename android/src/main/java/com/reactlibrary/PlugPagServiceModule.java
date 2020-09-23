@@ -20,6 +20,7 @@ import java.util.Map;
 
 import android.util.Log;
 import android.app.Activity;
+import android.os.Build;
 
 import com.facebook.react.ReactApplication;
 import com.facebook.react.ReactNativeHost;
@@ -122,6 +123,12 @@ public class PlugPagServiceModule extends ReactContextBaseJavaModule {
         }}));
 
         return constants;
+    }
+
+    @ReactMethod
+    public void GetSerialNumber(Callback callbackSerial) {
+        String serial = Build.SERIAL;
+        callbackSerial.invoke(serial);
     }
 
     // Cria a identificação do aplicativo
