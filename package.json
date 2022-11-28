@@ -1,7 +1,7 @@
 {
   "name": "lapag-plug-pag-service",
   "title": "React Native Plug Pag Service",
-  "version": "0.1.4",
+  "version": "1.22.0",
   "description": "Lapag Plug Pag Service Plugin",
   "main": "index.js",
   "scripts": {
